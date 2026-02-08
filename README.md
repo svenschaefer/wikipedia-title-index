@@ -53,6 +53,12 @@ Endpoints:
 
 OpenAPI contract: `openapi.yaml`
 
+## Docs
+
+- Operations: `docs/OPS.md`
+- Package contract: `docs/NPM.md`
+- Agent behavior contract: `docs/AGENT.md`
+
 ## Data and licensing
 
 Wikipedia title data is subject to Creative Commons Attribution-ShareAlike (CC BY-SA).
@@ -62,4 +68,4 @@ This package does not alter, reinterpret, or relicense the underlying data.
 
 - `data/` artifacts are local runtime/build output and are not part of npm publish.
 - SQL access is constrained to read-only `SELECT` on `main.titles.t`.
-- Lock behavior (`v1.0.1`): lock files are validated by recorded PID liveness. Stale locks are auto-removed; live locks block concurrent start.
+- Lock behavior (`v1.0.1+`): lock files are validated by recorded PID liveness. Stale locks are auto-removed; live locks block concurrent start.
