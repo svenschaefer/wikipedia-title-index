@@ -181,6 +181,8 @@ The agent MUST manage and respect:
 
 - **Lockfiles**
   - enforce mutual exclusion between build and service processes
+  - validity determined by lock-file existence + recorded PID liveness
+  - stale locks (dead PID) are auto-removed on acquisition attempts
 
 - **Ready marker**
   - published only after successful startup

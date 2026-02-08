@@ -34,7 +34,7 @@ wikipedia-title-index clean
 
 - `WIKIPEDIA_INDEX_DATA_DIR` (default: `data`)
 - `WIKIPEDIA_INDEX_DB_PATH` (override full DB path)
-- `WIKIPEDIA_INDEX_SOURCE_URL` (default source URL for builds)
+- `WIKIPEDIA_INDEX_SOURCE_URL` (default: `https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-all-titles-in-ns0.gz`)
 - `WIKIPEDIA_INDEX_AUTOSETUP` (`0` disables auto-setup)
 - `SECS_WIKI_INDEX_PORT` (default: `32123`)
 
@@ -62,3 +62,4 @@ This package does not alter, reinterpret, or relicense the underlying data.
 
 - `data/` artifacts are local runtime/build output and are not part of npm publish.
 - SQL access is constrained to read-only `SELECT` on `main.titles.t`.
+- Lock behavior (`v1.0.1`): lock files are validated by recorded PID liveness. Stale locks are auto-removed; live locks block concurrent start.

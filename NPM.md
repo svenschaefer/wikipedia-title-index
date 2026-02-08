@@ -60,7 +60,7 @@ Runtime constraints:
 
 ## 4. Data Source
 
-Default data source (example):
+Default data source:
 
 https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-all-titles-in-ns0.gz
 
@@ -71,7 +71,7 @@ Characteristics:
 - one title per line
 - official Wikimedia infrastructure
 
-Alternative sources MAY be supported via configuration.
+Alternative sources MAY be supported via configuration (`--file`, `--url`, or `WIKIPEDIA_INDEX_SOURCE_URL`).
 
 ---
 
@@ -194,10 +194,10 @@ Metadata is authoritative for:
 The package SHOULD expose a minimal CLI:
 
 ```bash
-wikipedia-index build
-wikipedia-index serve
-wikipedia-index status
-wikipedia-index clean
+wikipedia-title-index build
+wikipedia-title-index serve
+wikipedia-title-index status
+wikipedia-title-index clean
 ```
 
 Behavior:
@@ -240,6 +240,7 @@ The package guarantees:
 
 * single build at a time
 * single running service instance
+* stale-lock recovery by PID liveness check
 * local-only network binding
 * deterministic behavior
 * explicit failure modes

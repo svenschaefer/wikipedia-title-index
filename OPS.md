@@ -67,8 +67,9 @@ wikipedia-indexed.lock    # query service active
 
 #### Build process
 
-- MUST fail to start if `wikipedia-build.lock` exists
-- MUST fail to start if `wikipedia-indexed.lock` exists
+- MUST fail to start if `wikipedia-build.lock` exists with a live PID
+- MUST fail to start if `wikipedia-indexed.lock` exists with a live PID
+- MUST remove stale lock files automatically when lock PID is not alive
 - MUST acquire `wikipedia-build.lock` before any build activity
 - MUST release the lock on:
   - normal completion
@@ -77,12 +78,13 @@ wikipedia-indexed.lock    # query service active
 
 #### Query service
 
-- MUST fail to start if `wikipedia-indexed.lock` exists
+- MUST fail to start if `wikipedia-indexed.lock` exists with a live PID
 - MUST fail to start if `wikipedia-build.lock` exists
+- MUST remove stale `wikipedia-indexed.lock` automatically when lock PID is not alive
 - MUST acquire `wikipedia-indexed.lock` before binding the network port
 - MUST release the lock on shutdown
 
-Locks are created using **atomic exclusive open**.
+Locks are created using **atomic exclusive open** after stale-lock validation.
 No polling or retries are permitted.
 
 ---
@@ -307,7 +309,7 @@ On SIGINT / SIGTERM:
 - DB connections MUST be closed
 - lock and ready files MUST be removed
 
-Stale locks MAY be removed manually after verifying no process is running.
+Stale locks are automatically recovered by PID liveness checks.
 
 ---
 
