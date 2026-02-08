@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.2] - 2026-02-08
+
+### Fixed
+- README install instruction now uses `npm i wikipedia-title-index`.
+- README REST start instruction now uses `npx wikipedia-title-index serve` for installed-package usage.
+
 ## [1.0.1] - 2026-02-08
 
 ### Changed
