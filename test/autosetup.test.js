@@ -1,0 +1,88 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const {
+  makeTempWorkspace,
+  writeLines,
+  runNode,
+  startNode,
+  randomPort,
+  waitFor,
+  removeTree,
+} = require("./test-helpers");
+
+const PROJECT_DIR = path.resolve(__dirname, "..");
+const SERVICE_SCRIPT = path.join(PROJECT_DIR, "wikipedia-indexed.js");
+
+test("autosetup disabled fails fast when index is missing", () => {
+  const temp = makeTempWorkspace("autosetup-off");
+  try {
+    writeLines(path.join(temp, "data", "raw", "enwiki-latest-all-titles.ns0.txt"), [
+      "Alpha_Title",
+    ]);
+    const port = randomPort();
+    const result = runNode([SERVICE_SCRIPT], {
+      cwd: temp,
+      env: {
+        ...process.env,
+        WIKIPEDIA_INDEX_AUTOSETUP: "0",
+        WIKIPEDIA_INDEX_DATA_DIR: path.join(temp, "data"),
+        SECS_WIKI_INDEX_PORT: `${port}`,
+      },
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr + result.stdout, /auto-setup is disabled/i);
+  } finally {
+    removeTree(temp);
+  }
+});
+
+test("autosetup enabled builds on first run and serves queries", async () => {
+  const temp = makeTempWorkspace("autosetup-on");
+  const port = randomPort();
+  let child = null;
+
+  try {
+    writeLines(path.join(temp, "data", "raw", "enwiki-latest-all-titles.ns0.txt"), [
+      "Alpha_Title",
+      "Albert_Einstein",
+      "Algebra",
+    ]);
+
+    child = startNode([SERVICE_SCRIPT], {
+      cwd: temp,
+      env: {
+        ...process.env,
+        WIKIPEDIA_INDEX_AUTOSETUP: "1",
+        WIKIPEDIA_INDEX_DATA_DIR: path.join(temp, "data"),
+        SECS_WIKI_INDEX_PORT: `${port}`,
+      },
+    });
+
+    await waitFor(`http://127.0.0.1:${port}/health`);
+
+    const queryResponse = await fetch(`http://127.0.0.1:${port}/v1/titles/query`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        sql: "SELECT t FROM titles WHERE t >= ?1 AND t < ?2 ORDER BY t",
+        params: ["Albert", `Albert\uffff`],
+        max_rows: 5,
+      }),
+    });
+    assert.equal(queryResponse.status, 200);
+    const body = await queryResponse.json();
+    assert.ok(body.rows.some((r) => r[0] === "Albert Einstein"));
+  } finally {
+    if (child) {
+      child.kill("SIGTERM");
+      await onceExit(child);
+    }
+    removeTree(temp);
+  }
+});
+
+function onceExit(child) {
+  return new Promise((resolve) => child.once("exit", resolve));
+}
