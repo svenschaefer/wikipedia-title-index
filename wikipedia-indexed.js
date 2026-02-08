@@ -263,7 +263,7 @@ if (require.main === module) {
 function logRequest(requestId, startedAt, meta, endpoint) {
   const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
   logEvent("request", {
-    request_id: requestId,
+    requestId,
     endpoint,
     status: meta.status,
     row_count: meta.row_count,
@@ -285,3 +285,4 @@ function logEvent(event, fields) {
 module.exports = {
   startServer,
 };
+
