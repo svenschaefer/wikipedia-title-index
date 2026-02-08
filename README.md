@@ -17,7 +17,7 @@ Local Wikipedia title index builder and constrained query service.
 ## Install
 
 ```bash
-npm install
+npm i wikipedia-title-index
 ```
 
 ## CLI
@@ -43,7 +43,7 @@ wikipedia-title-index clean
 Start:
 
 ```bash
-node wikipedia-indexed.js
+npx wikipedia-title-index serve
 ```
 
 Endpoints:
