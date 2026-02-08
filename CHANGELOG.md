@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.1.0] - 2026-02-08
+
+### Changed
+- Finalized v1.1 repository structure (`src/`, `test/`, `docs/`, `types/`, `openapi/`) and removed root compatibility shims.
+- Aligned package exports/bin/docs with the new structure while keeping runtime behavior unchanged.
+
 ## [1.0.2] - 2026-02-08
 
 ### Fixed
@@ -25,3 +31,5 @@ All notable changes to this project are documented in this file.
 - OpenAPI specification and linting.
 - Test suite for core behavior.
 - Security policy and operational docs.
+
+

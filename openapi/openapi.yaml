@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Wikipedia Titles Query Service
-  version: 1.0.2
+  version: 1.1.0
   license:
     name: UNLICENSED
     identifier: UNLICENSED
@@ -83,4 +83,5 @@ paths:
           description: Request/response exceeds limits
         "500":
           description: Internal error
+
 

@@ -1,6 +1,6 @@
 const path = require("node:path");
 
-const API_VERSION = "1.0.2";
+const API_VERSION = "1.1.0";
 const SCHEMA_VERSION = "1";
 const SOURCE_TYPE = "all-titles-in-ns0";
 const DEFAULT_SOURCE_URL =
@@ -29,4 +29,5 @@ module.exports = {
   DEFAULT_SOURCE_URL,
   DEFAULTS,
 };
+
 
