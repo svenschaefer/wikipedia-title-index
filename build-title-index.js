@@ -4,11 +4,14 @@ const zlib = require("node:zlib");
 const readline = require("node:readline");
 const { Readable } = require("node:stream");
 const { DatabaseSync } = require("node:sqlite");
-const { SOURCE_TYPE, SCHEMA_VERSION, DEFAULTS } = require("./lib/constants");
+const {
+  SOURCE_TYPE,
+  SCHEMA_VERSION,
+  DEFAULTS,
+  DEFAULT_SOURCE_URL,
+} = require("./lib/constants");
 const { getConfig } = require("./lib/paths");
 const { acquireProcessLock } = require("./lib/process-lock");
-
-const DEFAULT_INPUT = "data/raw/enwiki-latest-all-titles.ns0.txt";
 
 async function buildIndex(options = {}) {
   const config = getConfig();
@@ -102,12 +105,21 @@ function resolveSource(fileArg, urlArg) {
     };
   }
 
-  const filePath = fileArg ?? DEFAULT_INPUT;
+  if (fileArg) {
+    return {
+      kind: classifySource(fileArg),
+      isGzip: fileArg.endsWith(".gz"),
+      url: null,
+      file: fileArg,
+    };
+  }
+
+  const defaultUrl = DEFAULT_SOURCE_URL;
   return {
-    kind: classifySource(filePath),
-    isGzip: filePath.endsWith(".gz"),
-    url: null,
-    file: filePath,
+    kind: classifySource(defaultUrl),
+    isGzip: defaultUrl.endsWith(".gz"),
+    url: defaultUrl,
+    file: null,
   };
 }
 

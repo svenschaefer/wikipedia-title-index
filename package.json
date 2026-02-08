@@ -1,6 +1,6 @@
 {
   "name": "wikipedia-title-index",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Local Wikipedia title index build and constrained query service.",
   "license": "MIT",
   "type": "commonjs",

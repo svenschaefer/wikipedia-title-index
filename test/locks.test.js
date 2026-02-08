@@ -34,6 +34,12 @@ test("locks enforce build/service mutual exclusion", () => {
     assert.match(result.stderr + result.stdout, /service lock exists/i);
     fs.rmSync(path.join(runDir, "wikipedia-indexed.lock"), { force: true });
 
+    result = runNode([BUILD_SCRIPT, "--file", "data/raw/enwiki-latest-all-titles.ns0.txt"], {
+      cwd: temp,
+      env: { ...process.env, WIKIPEDIA_INDEX_DATA_DIR: dataDir },
+    });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
     fs.writeFileSync(path.join(runDir, "wikipedia-build.lock"), "{}\n");
     result = runNode([SERVICE_SCRIPT], {
       cwd: temp,
@@ -57,7 +63,7 @@ test("locks enforce build/service mutual exclusion", () => {
       },
     });
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr + result.stdout, /Service lock already exists/i);
+    assert.match(result.stderr + result.stdout, /Lock exists \(missing pid\)/i);
   } finally {
     removeTree(temp);
   }

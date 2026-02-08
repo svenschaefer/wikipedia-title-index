@@ -16,9 +16,6 @@ async function startServer() {
   const config = getConfig();
   fs.mkdirSync(config.runDir, { recursive: true });
 
-  if (fs.existsSync(config.serviceLockPath)) {
-    throw new Error("Service lock already exists");
-  }
   if (fs.existsSync(config.buildLockPath)) {
     throw new Error("Build lock already exists");
   }
@@ -91,10 +88,15 @@ async function startServer() {
     process.exit(0);
   });
 
-  await new Promise((resolve, reject) => {
-    server.once("error", reject);
-    server.listen(config.port, config.host, resolve);
-  });
+  try {
+    await new Promise((resolve, reject) => {
+      server.once("error", reject);
+      server.listen(config.port, config.host, resolve);
+    });
+  } catch (error) {
+    closeAll();
+    throw error;
+  }
 
   writeReadyFile(config);
   console.log(`wikipedia-indexed listening on http://${config.host}:${config.port}`);
