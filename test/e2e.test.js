@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const {
   makeTempWorkspace,
-  writeLines,
+  copyFixture,
   runNode,
   startNode,
   randomPort,
@@ -13,8 +13,8 @@ const {
 } = require("./test-helpers");
 
 const PROJECT_DIR = path.resolve(__dirname, "..");
-const BUILD_SCRIPT = path.join(PROJECT_DIR, "build-title-index.js");
-const SERVICE_SCRIPT = path.join(PROJECT_DIR, "wikipedia-indexed.js");
+const BUILD_SCRIPT = path.join(PROJECT_DIR, "src", "cli", "build.js");
+const SERVICE_SCRIPT = path.join(PROJECT_DIR, "src", "server", "wikipedia-indexed.js");
 
 test("end-to-end smoke test with request logging and no SQL leakage", async () => {
   const temp = makeTempWorkspace("e2e");
@@ -24,11 +24,10 @@ test("end-to-end smoke test with request logging and no SQL leakage", async () =
   let stdout = "";
 
   try {
-    writeLines(path.join(dataDir, "raw", "enwiki-latest-all-titles.ns0.txt"), [
-      "Alpha_Title",
-      "Albert_Einstein",
-      "Algebra",
-    ]);
+    copyFixture(
+      "ns0-sample.txt",
+      path.join(dataDir, "raw", "enwiki-latest-all-titles.ns0.txt")
+    );
 
     const build = runNode([BUILD_SCRIPT, "--file", "data/raw/enwiki-latest-all-titles.ns0.txt"], {
       cwd: temp,

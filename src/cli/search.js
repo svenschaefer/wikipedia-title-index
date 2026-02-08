@@ -1,19 +1,19 @@
 const { DatabaseSync } = require("node:sqlite");
-const { getConfig } = require("./lib/paths");
+const { getConfig } = require("../lib/paths");
 
 const DEFAULT_LIMIT = 25;
 
 function printUsage() {
-  console.log("Usage: node search-title-index.js <query> [limit]");
+  console.log("Usage: wikipedia-title-index query <query> [limit]");
   console.log("Examples:");
-  console.log('  node search-title-index.js "Albert Einstein"');
-  console.log('  node search-title-index.js "Albert" 50');
+  console.log('  wikipedia-title-index query "Albert Einstein"');
+  console.log('  wikipedia-title-index query "Albert" 50');
 }
 
-function main() {
-  const rawQuery = process.argv[2]?.trim();
+function main(argv = process.argv.slice(2)) {
+  const rawQuery = argv[0]?.trim();
   const query = rawQuery?.replaceAll("_", " ");
-  const limitArg = Number.parseInt(process.argv[3] ?? `${DEFAULT_LIMIT}`, 10);
+  const limitArg = Number.parseInt(argv[1] ?? `${DEFAULT_LIMIT}`, 10);
   const limit =
     Number.isFinite(limitArg) && limitArg > 0 ? limitArg : DEFAULT_LIMIT;
 
@@ -62,3 +62,7 @@ function main() {
 if (require.main === module) {
   main();
 }
+
+module.exports = {
+  main,
+};

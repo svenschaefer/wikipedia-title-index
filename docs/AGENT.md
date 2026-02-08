@@ -1,7 +1,7 @@
 # AGENT.md — Wikipedia Titles Query Service Agent
 
 > Status: active behavioral contract for this folder implementation
-> (`build-title-index.js`, `search-title-index.js`, `wikipedia-indexed.js`).
+> (`src/cli/build.js`, `src/cli/search.js`, `src/server/wikipedia-indexed.js`).
 
 This document defines the **behavioral, semantic, and lifecycle contract** for the
 Wikipedia Titles Query Service agent.

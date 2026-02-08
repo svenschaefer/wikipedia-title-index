@@ -9,9 +9,9 @@ const {
   SCHEMA_VERSION,
   DEFAULTS,
   DEFAULT_SOURCE_URL,
-} = require("./lib/constants");
-const { getConfig } = require("./lib/paths");
-const { acquireProcessLock } = require("./lib/process-lock");
+} = require("../lib/constants");
+const { getConfig } = require("../lib/paths");
+const { acquireProcessLock } = require("../lib/process-lock");
 
 async function buildIndex(options = {}) {
   const config = getConfig();
@@ -224,8 +224,8 @@ function parseArgs(argv) {
   return options;
 }
 
-async function main() {
-  await buildIndex(parseArgs(process.argv.slice(2)));
+async function main(argv = process.argv.slice(2)) {
+  await buildIndex(parseArgs(argv));
 }
 
 if (require.main === module) {
@@ -237,4 +237,5 @@ if (require.main === module) {
 
 module.exports = {
   buildIndex,
+  main,
 };

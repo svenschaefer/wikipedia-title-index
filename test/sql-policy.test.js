@@ -4,8 +4,8 @@ const { DatabaseSync } = require("node:sqlite");
 const {
   validateQueryRequest,
   createAuthorizer,
-} = require("../lib/sql-policy");
-const { getConfig } = require("../lib/paths");
+} = require("../src/lib/sql-policy");
+const { getConfig } = require("../src/lib/paths");
 
 test("validateQueryRequest rejects non-select and multi-statement", () => {
   const config = getConfig();

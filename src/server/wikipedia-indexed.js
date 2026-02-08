@@ -2,15 +2,15 @@ const fs = require("node:fs");
 const http = require("node:http");
 const crypto = require("node:crypto");
 const { DatabaseSync } = require("node:sqlite");
-const { API_VERSION } = require("./lib/constants");
-const { getConfig } = require("./lib/paths");
-const { acquireProcessLock } = require("./lib/process-lock");
-const { ensureIndexReady } = require("./lib/autosetup");
+const { API_VERSION } = require("../lib/constants");
+const { getConfig } = require("../lib/paths");
+const { acquireProcessLock } = require("../lib/process-lock");
+const { ensureIndexReady } = require("../lib/autosetup");
 const {
   validateQueryRequest,
   createAuthorizer,
   createClientError,
-} = require("./lib/sql-policy");
+} = require("../lib/sql-policy");
 
 async function startServer() {
   const config = getConfig();
@@ -254,14 +254,6 @@ async function readJsonBody(req, maxBytes) {
   }
 }
 
-if (require.main === module) {
-  startServer().catch((error) => {
-    logEvent("fatal", { message: error.message ?? "Unexpected error" });
-    console.error(error.message);
-    process.exit(1);
-  });
-}
-
 function logRequest(requestId, startedAt, meta, endpoint) {
   const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
   logEvent("request", {
@@ -284,7 +276,19 @@ function logEvent(event, fields) {
   console.log(JSON.stringify(payload));
 }
 
+async function main() {
+  await startServer();
+}
+
+if (require.main === module) {
+  main().catch((error) => {
+    logEvent("fatal", { message: error.message ?? "Unexpected error" });
+    console.error(error.message);
+    process.exit(1);
+  });
+}
+
 module.exports = {
   startServer,
+  main,
 };
-

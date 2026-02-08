@@ -1,0 +1,3 @@
+0	Beta_Title
+1	Talk_Page
+0	Alpha_Title

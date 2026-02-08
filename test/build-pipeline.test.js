@@ -4,7 +4,7 @@ const path = require("node:path");
 const { DatabaseSync } = require("node:sqlite");
 const {
   makeTempWorkspace,
-  writeLines,
+  copyFixture,
   gzipFile,
   runNode,
   startNode,
@@ -14,7 +14,7 @@ const {
 } = require("./test-helpers");
 
 const PROJECT_DIR = path.resolve(__dirname, "..");
-const BUILD_SCRIPT = path.join(PROJECT_DIR, "build-title-index.js");
+const BUILD_SCRIPT = path.join(PROJECT_DIR, "src", "cli", "build.js");
 
 test("build pipeline supports local ns0 gzip, all-titles filtering, and URL gzip", async () => {
   const temp = makeTempWorkspace("build");
@@ -25,7 +25,7 @@ test("build pipeline supports local ns0 gzip, all-titles filtering, and URL gzip
 
   try {
     const ns0Txt = path.join(rawDir, "enwiki-latest-all-titles-in-ns0.txt");
-    writeLines(ns0Txt, ["Zulu_Title", "Alpha_Title"]);
+    copyFixture("ns0-sample.txt", ns0Txt);
     const ns0Gz = path.join(rawDir, "enwiki-latest-all-titles-in-ns0.gz");
     gzipFile(ns0Txt, ns0Gz);
 
@@ -34,10 +34,15 @@ test("build pipeline supports local ns0 gzip, all-titles filtering, and URL gzip
       env: { ...process.env, WIKIPEDIA_INDEX_DATA_DIR: dataDir },
     });
     assert.equal(result.status, 0, result.stderr || result.stdout);
-    assert.deepEqual(readTitles(indexDbPath), ["Alpha Title", "Zulu Title"]);
+    assert.deepEqual(readTitles(indexDbPath), [
+      "Albert Einstein",
+      "Algebra",
+      "Alpha Title",
+      "Zulu Title",
+    ]);
 
     const allTxt = path.join(rawDir, "enwiki-latest-all-titles.txt");
-    writeLines(allTxt, ["0\tBeta_Title", "1\tTalk_Page", "0\tAlpha_Title"]);
+    copyFixture("all-titles-sample.txt", allTxt);
     const allGz = path.join(rawDir, "enwiki-latest-all-titles.gz");
     gzipFile(allTxt, allGz);
 

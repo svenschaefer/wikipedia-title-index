@@ -8,6 +8,15 @@ function makeTempWorkspace(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `wiki-${prefix}-`));
 }
 
+function fixturePath(name) {
+  return path.join(__dirname, "fixtures", name);
+}
+
+function copyFixture(name, destinationPath) {
+  fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
+  fs.copyFileSync(fixturePath(name), destinationPath);
+}
+
 function writeLines(filePath, lines) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${lines.join("\n")}\n`, "utf8");
@@ -59,6 +68,8 @@ function removeTree(dir) {
 
 module.exports = {
   makeTempWorkspace,
+  fixturePath,
+  copyFixture,
   writeLines,
   gzipFile,
   runNode,

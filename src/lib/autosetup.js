@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const { DatabaseSync } = require("node:sqlite");
 const { SCHEMA_VERSION } = require("./constants");
 const { acquireProcessLock } = require("./process-lock");
-const { buildIndex } = require("../build-title-index");
+const { buildIndex } = require("../cli/build");
 
 function getIndexState(config) {
   if (!fs.existsSync(config.dbPath)) {

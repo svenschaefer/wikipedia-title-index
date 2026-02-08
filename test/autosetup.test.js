@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const {
   makeTempWorkspace,
-  writeLines,
+  copyFixture,
   runNode,
   startNode,
   randomPort,
@@ -13,14 +13,15 @@ const {
 } = require("./test-helpers");
 
 const PROJECT_DIR = path.resolve(__dirname, "..");
-const SERVICE_SCRIPT = path.join(PROJECT_DIR, "wikipedia-indexed.js");
+const SERVICE_SCRIPT = path.join(PROJECT_DIR, "src", "server", "wikipedia-indexed.js");
 
 test("autosetup disabled fails fast when index is missing", () => {
   const temp = makeTempWorkspace("autosetup-off");
   try {
-    writeLines(path.join(temp, "data", "raw", "enwiki-latest-all-titles.ns0.txt"), [
-      "Alpha_Title",
-    ]);
+    copyFixture(
+      "ns0-sample.txt",
+      path.join(temp, "data", "raw", "enwiki-latest-all-titles.ns0.txt")
+    );
     const port = randomPort();
     const result = runNode([SERVICE_SCRIPT], {
       cwd: temp,
@@ -52,11 +53,7 @@ test("autosetup enabled builds on first run and serves queries", async () => {
       "raw",
       "enwiki-latest-all-titles-in-ns0.txt"
     );
-    writeLines(sourceFile, [
-      "Alpha_Title",
-      "Albert_Einstein",
-      "Algebra",
-    ]);
+    copyFixture("ns0-sample.txt", sourceFile);
 
     const sourceScript = `
       const http = require("node:http");

@@ -51,7 +51,7 @@ Endpoints:
 - `GET /health`
 - `POST /v1/titles/query`
 
-OpenAPI contract: `openapi.yaml`
+OpenAPI contract: `openapi/openapi.yaml`
 
 ## Docs
 

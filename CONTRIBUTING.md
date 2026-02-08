@@ -15,7 +15,7 @@ npm ci
 
 ```bash
 npm test
-npx @redocly/cli lint openapi.yaml
+npx @redocly/cli lint openapi/openapi.yaml
 ```
 
 ## Pull Requests

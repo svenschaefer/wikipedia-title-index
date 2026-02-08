@@ -4,15 +4,15 @@ const fs = require("node:fs");
 const path = require("node:path");
 const {
   makeTempWorkspace,
-  writeLines,
+  copyFixture,
   runNode,
   randomPort,
   removeTree,
 } = require("./test-helpers");
 
 const PROJECT_DIR = path.resolve(__dirname, "..");
-const SERVICE_SCRIPT = path.join(PROJECT_DIR, "wikipedia-indexed.js");
-const BUILD_SCRIPT = path.join(PROJECT_DIR, "build-title-index.js");
+const SERVICE_SCRIPT = path.join(PROJECT_DIR, "src", "server", "wikipedia-indexed.js");
+const BUILD_SCRIPT = path.join(PROJECT_DIR, "src", "cli", "build.js");
 
 test("locks enforce build/service mutual exclusion", () => {
   const temp = makeTempWorkspace("locks");
@@ -21,9 +21,10 @@ test("locks enforce build/service mutual exclusion", () => {
   fs.mkdirSync(runDir, { recursive: true });
 
   try {
-    writeLines(path.join(dataDir, "raw", "enwiki-latest-all-titles.ns0.txt"), [
-      "Alpha_Title",
-    ]);
+    copyFixture(
+      "ns0-sample.txt",
+      path.join(dataDir, "raw", "enwiki-latest-all-titles.ns0.txt")
+    );
 
     fs.writeFileSync(path.join(runDir, "wikipedia-indexed.lock"), "{}\n");
     let result = runNode([BUILD_SCRIPT, "--file", "data/raw/enwiki-latest-all-titles.ns0.txt"], {

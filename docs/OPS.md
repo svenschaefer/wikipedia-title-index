@@ -256,7 +256,7 @@ The service SHOULD log:
 - fatal errors
 
 Per-request logging SHOULD include:
-- request id
+- requestId
 - endpoint
 - status code
 - row count
@@ -333,3 +333,63 @@ This service is designed to be:
 - operationally boring
 
 Correctness and clarity take precedence over convenience.
+
+---
+
+## 16. SQLite WAL/SHM Behavior
+
+Runtime may create companion files next to `titles.db`:
+
+- `titles.db-wal`
+- `titles.db-shm`
+
+Operational notes:
+- Presence of WAL/SHM files is expected and not an error condition.
+- WAL/SHM files are SQLite runtime artifacts, not independent datasets.
+- Operators MUST treat `titles.db`, `titles.db-wal`, and `titles.db-shm` as one logical database state.
+
+---
+
+## 17. Troubleshooting
+
+### Service fails with active lock
+
+Expected when lock PID is alive.
+
+Actions:
+1. Confirm running process for the lock PID.
+2. Stop that process gracefully.
+3. Start service again.
+
+### Lock file exists but process is gone
+
+Expected stale-lock scenario.
+
+Behavior:
+- Startup performs PID liveness check.
+- Stale lock is removed automatically.
+- Startup continues.
+
+### First run appears slow
+
+Likely auto-setup build and download in progress.
+
+Checks:
+1. Monitor process output for indexed row progress.
+2. Verify `data/index/metadata.json` appears after build.
+3. Verify `data/run/wikipedia-indexed.ready` appears after successful startup.
+
+---
+
+## 18. First-Run Recovery Runbook
+
+Use this when first-run auto-setup is interrupted.
+
+1. Stop any running service process.
+2. Remove stale run artifacts in `data/run/` if no process is alive.
+3. Keep `WIKIPEDIA_INDEX_AUTOSETUP=1` (default behavior).
+4. Start service again:
+   - `npx wikipedia-title-index serve`
+5. Validate health:
+   - `GET /health` returns `200`
+   - `db_path` and `api_version` are present.
