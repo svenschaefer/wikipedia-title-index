@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.4] - 2026-02-09
+
+### Changed
+- Cache files now store bucket entries keyed by canonical query key, enabling safe handling if multiple query keys ever map to the same hash file.
+- Added temporary legacy cache migration logic for old single-payload file format (planned removal in v1.3+).
+- Added regression tests for legacy migration and multi-entry bucket key matching.
+
 ## [1.2.3] - 2026-02-09
 
 ### Changed

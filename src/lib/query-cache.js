@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const CACHE_BUCKET_VERSION = 2;
 
 function createQueryCache(config, options = {}) {
   if (!config.cacheEnabled) {
@@ -18,14 +19,24 @@ function createQueryCache(config, options = {}) {
 
   function get(query) {
     const entryPath = getEntryPath(config.cacheDir, dbFingerprint, query);
+    const queryKey = getQueryCacheKey(dbFingerprint, query);
     if (!fs.existsSync(entryPath)) {
       return null;
     }
 
     try {
-      const content = fs.readFileSync(entryPath, "utf8");
-      const parsed = JSON.parse(content);
-      return validatePayload(parsed) ? parsed : null;
+      const parsed = JSON.parse(fs.readFileSync(entryPath, "utf8"));
+      const normalized = normalizeBucket(parsed, queryKey, validatePayload);
+      if (!normalized) {
+        fs.unlinkSync(entryPath);
+        return null;
+      }
+
+      if (normalized.migrated) {
+        writeJsonAtomically(entryPath, normalized.bucket);
+      }
+      const hit = normalized.bucket.entries.find((entry) => entry.key === queryKey);
+      return hit ? hit.payload : null;
     } catch {
       try {
         fs.unlinkSync(entryPath);
@@ -36,25 +47,34 @@ function createQueryCache(config, options = {}) {
 
   function set(query, payload) {
     const entryPath = getEntryPath(config.cacheDir, dbFingerprint, query);
-    if (fs.existsSync(entryPath)) {
-      return;
-    }
-    const entryDir = path.dirname(entryPath);
-    fs.mkdirSync(entryDir, { recursive: true });
-
-    const tempPath = path.join(
-      entryDir,
-      `.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
-    );
+    const queryKey = getQueryCacheKey(dbFingerprint, query);
     try {
-      fs.writeFileSync(tempPath, JSON.stringify(payload));
-      fs.renameSync(tempPath, entryPath);
+      let bucket = {
+        version: CACHE_BUCKET_VERSION,
+        entries: [],
+      };
+
+      if (fs.existsSync(entryPath)) {
+        const parsed = JSON.parse(fs.readFileSync(entryPath, "utf8"));
+        const normalized = normalizeBucket(parsed, queryKey, validatePayload);
+        if (normalized) {
+          bucket = normalized.bucket;
+        }
+      }
+
+      if (bucket.entries.some((entry) => entry.key === queryKey)) {
+        if (bucket.version !== CACHE_BUCKET_VERSION) {
+          bucket.version = CACHE_BUCKET_VERSION;
+          writeJsonAtomically(entryPath, bucket);
+        }
+        return;
+      }
+
+      bucket.version = CACHE_BUCKET_VERSION;
+      bucket.entries.push({ key: queryKey, payload });
+      writeJsonAtomically(entryPath, bucket);
     } catch {
       // Cache write failures must not fail query execution.
-    } finally {
-      try {
-        if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-      } catch {}
     }
     cleanupCache(config.cacheDir, config.cacheTtlSeconds, config.cacheMaxEntries);
   }
@@ -76,18 +96,21 @@ function getDbFingerprint(dbPath) {
 }
 
 function getEntryPath(cacheDir, dbFingerprint, query) {
-  const hash = crypto
-    .createHash("sha256")
-    .update(
-      JSON.stringify({
-        db: dbFingerprint,
-        sql: query.sql,
-        params: query.params,
-        maxRows: query.maxRows,
-      })
-    )
-    .digest("hex");
+  const hash = getCacheHash(getQueryCacheKey(dbFingerprint, query));
   return getShardedEntryPath(cacheDir, hash);
+}
+
+function getQueryCacheKey(dbFingerprint, query) {
+  return JSON.stringify({
+    db: dbFingerprint,
+    sql: query.sql,
+    params: query.params,
+    maxRows: query.maxRows,
+  });
+}
+
+function getCacheHash(queryKey) {
+  return crypto.createHash("sha256").update(queryKey).digest("hex");
 }
 
 function isCachedPayload(value) {
@@ -165,6 +188,59 @@ function getShardedEntryPath(cacheDir, hash) {
   return path.join(cacheDir, levelOne, levelTwo, `${hash}.json`);
 }
 
+function writeJsonAtomically(entryPath, value) {
+  const entryDir = path.dirname(entryPath);
+  fs.mkdirSync(entryDir, { recursive: true });
+  const tempPath = path.join(
+    entryDir,
+    `.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
+  );
+  try {
+    fs.writeFileSync(tempPath, JSON.stringify(value));
+    fs.renameSync(tempPath, entryPath);
+  } finally {
+    try {
+      if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+    } catch {}
+  }
+}
+
+function normalizeBucket(parsed, queryKey, validatePayload) {
+  if (isCacheBucket(parsed, validatePayload)) {
+    return {
+      migrated: false,
+      bucket: {
+        version: CACHE_BUCKET_VERSION,
+        entries: parsed.entries,
+      },
+    };
+  }
+
+  // TODO(v1.3+): remove legacy single-payload migration path.
+  if (validatePayload(parsed)) {
+    return {
+      migrated: true,
+      bucket: {
+        version: CACHE_BUCKET_VERSION,
+        entries: [{ key: queryKey, payload: parsed }],
+      },
+    };
+  }
+
+  return null;
+}
+
+function isCacheBucket(value, validatePayload) {
+  if (!value || typeof value !== "object") return false;
+  if (!Array.isArray(value.entries)) return false;
+  for (const entry of value.entries) {
+    if (!entry || typeof entry !== "object") return false;
+    if (typeof entry.key !== "string") return false;
+    if (!validatePayload(entry.payload)) return false;
+  }
+  return true;
+}
+
 function createNoopCache() {
   return {
     get() {
@@ -187,4 +263,8 @@ module.exports = {
   createNoopCache,
   getShardedEntryPath,
   listCacheJsonFiles,
+  getQueryCacheKey,
+  getCacheHash,
+  isCacheBucket,
+  normalizeBucket,
 };
