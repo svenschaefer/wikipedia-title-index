@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.3] - 2026-02-09
+
+### Changed
+- Cache storage layout now uses two-level hash sharding under `data/cache`:
+  - `<h0h1>/<h2h3>/<full-hash>.json`
+- Cache cleanup and clear operations now traverse sharded cache directories recursively.
+- Updated tests for sharded cache layout and added layout-specific regression coverage.
+
 ## [1.2.2] - 2026-02-09
 
 ### Fixed

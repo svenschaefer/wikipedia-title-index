@@ -39,9 +39,11 @@ function createQueryCache(config, options = {}) {
     if (fs.existsSync(entryPath)) {
       return;
     }
+    const entryDir = path.dirname(entryPath);
+    fs.mkdirSync(entryDir, { recursive: true });
 
     const tempPath = path.join(
-      config.cacheDir,
+      entryDir,
       `.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
     );
     try {
@@ -85,7 +87,7 @@ function getEntryPath(cacheDir, dbFingerprint, query) {
       })
     )
     .digest("hex");
-  return path.join(cacheDir, `${hash}.json`);
+  return getShardedEntryPath(cacheDir, hash);
 }
 
 function isCachedPayload(value) {
@@ -99,14 +101,9 @@ function isCachedPayload(value) {
 
 function clearQueryCache(cacheDir) {
   if (!fs.existsSync(cacheDir)) return 0;
-  let deleted = 0;
-  for (const entry of fs.readdirSync(cacheDir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
-    try {
-      fs.unlinkSync(path.join(cacheDir, entry.name));
-      deleted += 1;
-    } catch {}
-  }
+  const deleted = listCacheJsonFiles(cacheDir).length;
+  fs.rmSync(cacheDir, { recursive: true, force: true });
+  fs.mkdirSync(cacheDir, { recursive: true });
   return deleted;
 }
 
@@ -114,10 +111,7 @@ function cleanupCache(cacheDir, ttlSeconds, maxEntries) {
   if (!fs.existsSync(cacheDir)) return;
   const now = Date.now();
   const files = [];
-
-  for (const entry of fs.readdirSync(cacheDir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
-    const filePath = path.join(cacheDir, entry.name);
+  for (const filePath of listCacheJsonFiles(cacheDir)) {
     let stats;
     try {
       stats = fs.statSync(filePath);
@@ -146,6 +140,31 @@ function cleanupCache(cacheDir, ttlSeconds, maxEntries) {
   }
 }
 
+function listCacheJsonFiles(rootDir) {
+  const files = [];
+  walkCacheDirectory(rootDir, files);
+  return files;
+}
+
+function walkCacheDirectory(dir, files) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walkCacheDirectory(fullPath, files);
+      continue;
+    }
+    if (entry.isFile() && entry.name.endsWith(".json")) {
+      files.push(fullPath);
+    }
+  }
+}
+
+function getShardedEntryPath(cacheDir, hash) {
+  const levelOne = hash.slice(0, 2);
+  const levelTwo = hash.slice(2, 4);
+  return path.join(cacheDir, levelOne, levelTwo, `${hash}.json`);
+}
+
 function createNoopCache() {
   return {
     get() {
@@ -166,4 +185,6 @@ module.exports = {
   clearQueryCache,
   cleanupCache,
   createNoopCache,
+  getShardedEntryPath,
+  listCacheJsonFiles,
 };

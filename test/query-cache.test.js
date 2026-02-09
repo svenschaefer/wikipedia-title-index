@@ -6,6 +6,7 @@ const {
   createQueryCache,
   getDbFingerprint,
   getEntryPath,
+  getShardedEntryPath,
   clearQueryCache,
 } = require("../src/lib/query-cache");
 const { makeTempWorkspace, removeTree, sleep } = require("./test-helpers");
@@ -32,7 +33,7 @@ test("corrupted cache entry is ignored and removed", async () => {
     });
     const query = { sql: "SELECT 1", params: [], maxRows: 1 };
     const cachePath = getEntryPath(cacheDir, getDbFingerprint(dbPath), query);
-    fs.mkdirSync(cacheDir, { recursive: true });
+    fs.mkdirSync(path.dirname(cachePath), { recursive: true });
     fs.writeFileSync(cachePath, "{broken json");
 
     assert.equal(cache.get(query), null);
@@ -76,7 +77,7 @@ test("cache key changes after db fingerprint changes", async () => {
     cacheAfter.set(query, { value: "after" });
     assert.deepEqual(cacheAfter.get(query), { value: "after" });
 
-    const entries = fs.readdirSync(cacheDir).filter((name) => name.endsWith(".json"));
+    const entries = listJsonFiles(cacheDir);
     assert.equal(entries.length, 2);
   } finally {
     removeTree(temp);
@@ -96,7 +97,7 @@ test("clearQueryCache removes all cache entries", () => {
     assert.equal(removed, 2);
     assert.equal(fs.existsSync(path.join(cacheDir, "one.json")), false);
     assert.equal(fs.existsSync(path.join(cacheDir, "two.json")), false);
-    assert.equal(fs.existsSync(path.join(cacheDir, "ignore.tmp")), true);
+    assert.equal(fs.existsSync(path.join(cacheDir, "ignore.tmp")), false);
   } finally {
     removeTree(temp);
   }
@@ -137,12 +138,39 @@ test("max entries eviction keeps newest cached entries", async () => {
     assert.equal(cache.get(q1), null);
     assert.deepEqual(cache.get(q2), { value: "v2" });
     assert.deepEqual(cache.get(q3), { value: "v3" });
-    const entries = fs.readdirSync(cacheDir).filter((name) => name.endsWith(".json"));
+    const entries = listJsonFiles(cacheDir);
     assert.equal(entries.length, 2);
   } finally {
     removeTree(temp);
   }
 });
+
+test("sharded path layout uses first two and next two hash characters", () => {
+  const cacheDir = path.join("data", "cache");
+  const hash = "e3b0c44298fc1c149afbf4c8996fb924";
+  const entryPath = getShardedEntryPath(cacheDir, hash);
+  assert.equal(entryPath, path.join("data", "cache", "e3", "b0", `${hash}.json`));
+});
+
+function listJsonFiles(root) {
+  if (!fs.existsSync(root)) return [];
+  const files = [];
+  walk(root, files);
+  return files;
+}
+
+function walk(dir, files) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walk(fullPath, files);
+      continue;
+    }
+    if (entry.isFile() && entry.name.endsWith(".json")) {
+      files.push(fullPath);
+    }
+  }
+}
 
 test("ttl eviction removes stale cached entries", async () => {
   const temp = makeTempWorkspace("query-cache-ttl");

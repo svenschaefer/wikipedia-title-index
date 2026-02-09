@@ -78,7 +78,7 @@ test("end-to-end smoke test with request logging and no SQL leakage", async () =
     assert.deepEqual(secondBody, body);
 
     const cacheDir = path.join(dataDir, "cache");
-    const cacheEntries = fs.readdirSync(cacheDir).filter((name) => name.endsWith(".json"));
+    const cacheEntries = listJsonFiles(cacheDir);
     assert.equal(cacheEntries.length, 1);
 
     await sleep(300);
@@ -99,4 +99,24 @@ test("end-to-end smoke test with request logging and no SQL leakage", async () =
 
 function onceExit(child) {
   return new Promise((resolve) => child.once("exit", resolve));
+}
+
+function listJsonFiles(root) {
+  if (!fs.existsSync(root)) return [];
+  const files = [];
+  walk(root, files);
+  return files;
+}
+
+function walk(dir, files) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walk(fullPath, files);
+      continue;
+    }
+    if (entry.isFile() && entry.name.endsWith(".json")) {
+      files.push(fullPath);
+    }
+  }
 }
