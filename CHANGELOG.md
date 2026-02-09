@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.0] - 2026-02-09
+
+### Added
+- Query result cache layer under `data/cache/` for REST (`POST /v1/titles/query`) and CLI (`query`) flows.
+- Cache controls: `WIKIPEDIA_INDEX_CACHE_ENABLED`, `WIKIPEDIA_INDEX_CACHE_TTL_SECONDS`, and `WIKIPEDIA_INDEX_CACHE_MAX_ENTRIES`.
+- Cache maintenance command: `wikipedia-title-index cache clear`.
+- Cache-focused test coverage for hit/miss, corruption fallback, DB fingerprint invalidation, disabled mode, TTL pruning, and eviction.
+
+### Changed
+- Runtime status output now includes cache configuration fields.
+- OpenAPI linting now runs through a wrapper to tolerate a known Windows Redocly assertion that can occur after successful validation.
+
 ## [1.1.0] - 2026-02-08
 
 ### Changed

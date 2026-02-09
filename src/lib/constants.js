@@ -1,6 +1,6 @@
 const path = require("node:path");
 
-const API_VERSION = "1.1.0";
+const API_VERSION = "1.2.0";
 const SCHEMA_VERSION = "1";
 const SOURCE_TYPE = "all-titles-in-ns0";
 const DEFAULT_SOURCE_URL =
@@ -8,6 +8,7 @@ const DEFAULT_SOURCE_URL =
 
 const DEFAULTS = {
   dataDir: "data",
+  cacheRelativePath: "cache",
   dbRelativePath: path.join("index", "titles.db"),
   metadataRelativePath: path.join("index", "metadata.json"),
   runDirRelativePath: "run",
@@ -19,6 +20,9 @@ const DEFAULTS = {
   maxRows: 1000,
   maxResponseBytes: 1_000_000,
   maxParamCount: 1000,
+  cacheEnabled: true,
+  cacheTtlSeconds: 24 * 60 * 60,
+  cacheMaxEntries: 10_000,
   batchSize: 10_000,
 };
 

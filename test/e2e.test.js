@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const path = require("node:path");
 const {
   makeTempWorkspace,
@@ -63,9 +64,28 @@ test("end-to-end smoke test with request logging and no SQL leakage", async () =
     const body = await query.json();
     assert.equal(body.row_count, 1);
 
+    const secondQuery = await fetch(`http://127.0.0.1:${port}/v1/titles/query`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        sql: sqlText,
+        params: ["Albert", `Albert\uffff`],
+        max_rows: 2,
+      }),
+    });
+    assert.equal(secondQuery.status, 200);
+    const secondBody = await secondQuery.json();
+    assert.deepEqual(secondBody, body);
+
+    const cacheDir = path.join(dataDir, "cache");
+    const cacheEntries = fs.readdirSync(cacheDir).filter((name) => name.endsWith(".json"));
+    assert.equal(cacheEntries.length, 1);
+
     await sleep(300);
     assert.match(stdout, /"event":"request"/);
     assert.match(stdout, /"endpoint":"\/v1\/titles\/query"/);
+    assert.match(stdout, /"endpoint":"\/v1\/titles\/query".*"cache_hit":false/);
+    assert.match(stdout, /"endpoint":"\/v1\/titles\/query".*"cache_hit":true/);
     assert.doesNotMatch(stdout, /SELECT t FROM titles/);
     assert.doesNotMatch(stdout, /Albert\\uffff/);
   } finally {

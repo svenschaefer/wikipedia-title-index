@@ -26,6 +26,7 @@ npm i wikipedia-title-index
 wikipedia-title-index build [--file <path> | --url <url>]
 wikipedia-title-index serve
 wikipedia-title-index query "<title-or-prefix>" [limit]
+wikipedia-title-index cache clear
 wikipedia-title-index status
 wikipedia-title-index clean
 ```
@@ -37,6 +38,13 @@ wikipedia-title-index clean
 - `WIKIPEDIA_INDEX_SOURCE_URL` (default: `https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-all-titles-in-ns0.gz`)
 - `WIKIPEDIA_INDEX_AUTOSETUP` (`0` disables auto-setup)
 - `SECS_WIKI_INDEX_PORT` (default: `32123`)
+- `WIKIPEDIA_INDEX_CACHE_ENABLED` (`0` disables cache, default: `1`)
+- `WIKIPEDIA_INDEX_CACHE_TTL_SECONDS` (default: `86400`, `0` disables TTL pruning)
+- `WIKIPEDIA_INDEX_CACHE_MAX_ENTRIES` (default: `10000`, `0` disables size pruning)
+
+Query cache:
+- Successful `/v1/titles/query` responses and CLI `query` results are cached in `data/cache/` by request shape.
+- Cache keys include DB fingerprint (`path + size + mtime`) to avoid stale reuse after rebuilds.
 
 ## REST service
 

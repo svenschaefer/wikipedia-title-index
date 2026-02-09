@@ -5,6 +5,7 @@ const { buildIndex } = require("./build");
 const { startServer } = require("../server/wikipedia-indexed");
 const { getConfig } = require("../lib/paths");
 const { getIndexState } = require("../lib/autosetup");
+const { clearQueryCache } = require("../lib/query-cache");
 
 async function main(argv = process.argv.slice(2)) {
   const [command, ...args] = argv;
@@ -40,6 +41,10 @@ async function main(argv = process.argv.slice(2)) {
       status: state.status,
       reason: state.reason,
       data_dir: config.dataDir,
+      cache_dir: config.cacheDir,
+      cache_enabled: config.cacheEnabled,
+      cache_ttl_seconds: config.cacheTtlSeconds,
+      cache_max_entries: config.cacheMaxEntries,
       db_path: config.dbPath,
       metadata_path: config.metadataPath,
       build_lock: config.buildLockPath,
@@ -47,6 +52,17 @@ async function main(argv = process.argv.slice(2)) {
       ready_file: config.readyPath,
     };
     console.log(JSON.stringify(payload, null, 2));
+    return;
+  }
+
+  if (command === "cache") {
+    const config = getConfig();
+    const [cacheCommand] = args;
+    if (cacheCommand !== "clear") {
+      throw new Error(`Unknown cache command: ${cacheCommand ?? "(none)"}`);
+    }
+    const removed = clearQueryCache(config.cacheDir);
+    console.log(`Cleared ${removed} cache entr${removed === 1 ? "y" : "ies"} from ${config.cacheDir}`);
     return;
   }
 
@@ -84,6 +100,7 @@ function printUsage() {
   console.log("  build [--file <path> | --url <url>]");
   console.log("  serve");
   console.log("  query <prefix-or-title> [limit]");
+  console.log("  cache clear");
   console.log("  status");
   console.log("  clean");
 }

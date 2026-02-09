@@ -11,6 +11,7 @@ export interface IndexState {
 
 export interface RuntimeConfig {
   dataDir: string;
+  cacheDir: string;
   dbPath: string;
   metadataPath: string;
   runDir: string;
@@ -22,6 +23,9 @@ export interface RuntimeConfig {
   maxRows: number;
   maxResponseBytes: number;
   maxParamCount: number;
+  cacheEnabled: boolean;
+  cacheTtlSeconds: number;
+  cacheMaxEntries: number;
 }
 
 export function buildIndex(options?: BuildIndexOptions): Promise<void>;

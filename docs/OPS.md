@@ -266,6 +266,17 @@ Per-request logging SHOULD include:
 
 SQL text and parameters MUST NOT be logged by default.
 
+Query result caching requirements:
+- Successful `POST /v1/titles/query` responses MUST be cached under `data/cache/`.
+- Cache keys MUST include SQL, params, effective `max_rows`, and DB fingerprint
+  (`db_path + size + mtime`).
+- Cache hits MUST bypass SQLite execution.
+- Cache MUST be configurable via:
+  - `WIKIPEDIA_INDEX_CACHE_ENABLED` (`0` disables reads/writes)
+  - `WIKIPEDIA_INDEX_CACHE_TTL_SECONDS` (`0` disables TTL pruning)
+  - `WIKIPEDIA_INDEX_CACHE_MAX_ENTRIES` (`0` disables size pruning)
+- Operators MAY clear cache via `wikipedia-title-index cache clear`.
+
 ---
 
 ## 11. Health Endpoint

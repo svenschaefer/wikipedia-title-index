@@ -1,7 +1,9 @@
 const { DatabaseSync } = require("node:sqlite");
 const { getConfig } = require("../lib/paths");
+const { createQueryCache } = require("../lib/query-cache");
 
 const DEFAULT_LIMIT = 25;
+const CACHE_KEY_SQL = "cli.query.v1";
 
 function printUsage() {
   console.log("Usage: wikipedia-title-index query <query> [limit]");
@@ -23,8 +25,17 @@ function main(argv = process.argv.slice(2)) {
   }
 
   const config = getConfig();
-  const db = new DatabaseSync(config.dbPath, { readOnly: true });
+  const queryCache = createQueryCache(config, {
+    validatePayload: isCliCachedPayload,
+  });
+  const cacheKey = { sql: CACHE_KEY_SQL, params: [query], maxRows: limit };
+  const cached = queryCache.get(cacheKey);
+  if (cached) {
+    printResult(cached.exact, cached.prefix);
+    return;
+  }
 
+  const db = new DatabaseSync(config.dbPath, { readOnly: true });
   try {
     const exact = db
       .prepare("SELECT t FROM titles WHERE t = ? LIMIT 1")
@@ -37,26 +48,40 @@ function main(argv = process.argv.slice(2)) {
     const displayedPrefixRows = exact
       ? prefixRows.filter((row) => row.t !== exact.t)
       : prefixRows;
+    const exactValue = exact?.t ?? null;
+    const prefixValues = displayedPrefixRows.map((row) => row.t);
+    queryCache.set(cacheKey, { exact: exactValue, prefix: prefixValues });
 
-    if (!exact && displayedPrefixRows.length === 0) {
-      console.log("No matches");
-      return;
-    }
-
-    if (exact) {
-      console.log("Exact match:");
-      console.log(exact.t);
-    }
-
-    if (displayedPrefixRows.length > 0) {
-      console.log(`Prefix matches (${displayedPrefixRows.length}):`);
-      for (const row of displayedPrefixRows) {
-        console.log(row.t);
-      }
-    }
+    printResult(exactValue, prefixValues);
   } finally {
     db.close();
   }
+}
+
+function printResult(exact, prefixValues) {
+  if (!exact && prefixValues.length === 0) {
+    console.log("No matches");
+    return;
+  }
+
+  if (exact) {
+    console.log("Exact match:");
+    console.log(exact);
+  }
+
+  if (prefixValues.length > 0) {
+    console.log(`Prefix matches (${prefixValues.length}):`);
+    for (const title of prefixValues) {
+      console.log(title);
+    }
+  }
+}
+
+function isCliCachedPayload(value) {
+  if (!value || typeof value !== "object") return false;
+  if (!(typeof value.exact === "string" || value.exact === null)) return false;
+  if (!Array.isArray(value.prefix)) return false;
+  return value.prefix.every((item) => typeof item === "string");
 }
 
 if (require.main === module) {

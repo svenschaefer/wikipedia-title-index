@@ -6,6 +6,7 @@ const { API_VERSION } = require("../lib/constants");
 const { getConfig } = require("../lib/paths");
 const { acquireProcessLock } = require("../lib/process-lock");
 const { ensureIndexReady } = require("../lib/autosetup");
+const { createQueryCache } = require("../lib/query-cache");
 const {
   validateQueryRequest,
   createAuthorizer,
@@ -30,6 +31,7 @@ async function startServer() {
   const db = new DatabaseSync(config.dbPath, { readOnly: true });
   db.exec("PRAGMA query_only=ON");
   db.setAuthorizer(createAuthorizer());
+  const queryCache = createQueryCache(config);
 
   logEvent("startup", { host: config.host, port: config.port, db_path: config.dbPath });
 
@@ -37,7 +39,7 @@ async function startServer() {
     const requestId = crypto.randomUUID();
     const startedAt = process.hrtime.bigint();
 
-    handleRequest(req, res, db, config)
+    handleRequest(req, res, db, config, queryCache)
       .then((meta) => {
         logRequest(requestId, startedAt, meta, req.url ?? "");
       })
@@ -102,7 +104,7 @@ async function startServer() {
   console.log(`wikipedia-indexed listening on http://${config.host}:${config.port}`);
 }
 
-async function handleRequest(req, res, db, config) {
+async function handleRequest(req, res, db, config, queryCache) {
   if (req.method === "GET" && req.url === "/health") {
     const stats = fs.statSync(config.dbPath);
     const bytesOut = sendJson(res, 200, {
@@ -134,6 +136,18 @@ async function handleRequest(req, res, db, config) {
       throw createClientError("INVALID_REQUEST", "max_rows must be a positive integer");
     }
     const maxRows = Math.min(requestedMaxRows, config.maxRows);
+    const query = { sql, params, maxRows };
+    const cachedPayload = queryCache.get(query);
+    if (cachedPayload) {
+      const bytesOut = sendJson(res, 200, cachedPayload);
+      return {
+        status: 200,
+        row_count: cachedPayload.row_count,
+        truncated: cachedPayload.truncated,
+        bytes_out: bytesOut,
+        cache_hit: true,
+      };
+    }
 
     const statement = db.prepare(`SELECT * FROM (${sql}) AS q LIMIT ?`);
     const rows = statement.all(...params, maxRows + 1);
@@ -153,12 +167,14 @@ async function handleRequest(req, res, db, config) {
         "Response payload exceeds configured max bytes"
       );
     }
+    queryCache.set(query, payload);
     const bytesOut = sendJson(res, 200, payload);
     return {
       status: 200,
       row_count: payload.row_count,
       truncated: payload.truncated,
       bytes_out: bytesOut,
+      cache_hit: false,
     };
   }
 
@@ -264,6 +280,7 @@ function logRequest(requestId, startedAt, meta, endpoint) {
     truncated: meta.truncated,
     duration_ms: Number(durationMs.toFixed(3)),
     bytes_out: meta.bytes_out,
+    cache_hit: Boolean(meta.cache_hit),
   });
 }
 

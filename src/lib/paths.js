@@ -6,11 +6,13 @@ function getConfig() {
   const dbPath =
     process.env.WIKIPEDIA_INDEX_DB_PATH ??
     path.join(dataDir, DEFAULTS.dbRelativePath);
+  const cacheDir = path.join(dataDir, DEFAULTS.cacheRelativePath);
   const metadataPath = path.join(dataDir, DEFAULTS.metadataRelativePath);
   const runDir = path.join(dataDir, DEFAULTS.runDirRelativePath);
 
   return {
     dataDir,
+    cacheDir,
     dbPath,
     metadataPath,
     runDir,
@@ -28,6 +30,20 @@ function getConfig() {
       process.env.WIKIPEDIA_INDEX_MAX_PARAM_COUNT,
       DEFAULTS.maxParamCount
     ),
+    cacheEnabled: toBool(
+      process.env.WIKIPEDIA_INDEX_CACHE_ENABLED,
+      DEFAULTS.cacheEnabled
+    ),
+    cacheTtlSeconds: toIntMin(
+      process.env.WIKIPEDIA_INDEX_CACHE_TTL_SECONDS,
+      DEFAULTS.cacheTtlSeconds,
+      0
+    ),
+    cacheMaxEntries: toIntMin(
+      process.env.WIKIPEDIA_INDEX_CACHE_MAX_ENTRIES,
+      DEFAULTS.cacheMaxEntries,
+      0
+    ),
   };
 }
 
@@ -37,6 +53,22 @@ function toInt(value, fallback) {
     return fallback;
   }
   return parsed;
+}
+
+function toIntMin(value, fallback, min) {
+  const parsed = Number.parseInt(value ?? "", 10);
+  if (!Number.isFinite(parsed) || parsed < min) {
+    return fallback;
+  }
+  return parsed;
+}
+
+function toBool(value, fallback) {
+  if (value === undefined) return fallback;
+  const normalized = `${value}`.trim().toLowerCase();
+  if (normalized === "1" || normalized === "true") return true;
+  if (normalized === "0" || normalized === "false") return false;
+  return fallback;
 }
 
 module.exports = {
