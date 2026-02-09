@@ -12,7 +12,7 @@ Local Wikipedia title index builder and constrained query service.
 - Streaming index build from file or URL
 - Local SQLite index (`titles(t TEXT PRIMARY KEY)`)
 - Local REST query service with SQLite authorizer policy
-- CLI for build/serve/query/status/clean
+- CLI for build/serve/title lookup/cache/status/clean
 
 ## Install
 
@@ -29,6 +29,41 @@ wikipedia-title-index query "<title-or-prefix>" [limit]
 wikipedia-title-index cache clear
 wikipedia-title-index status
 wikipedia-title-index clean
+```
+
+## Query modes (important)
+
+`wikipedia-title-index` has two query surfaces with different capabilities:
+
+| Surface | How to use | Supports raw SQL? | Purpose |
+|---|---|---:|---|
+| CLI | `wikipedia-title-index query "<title-or-prefix>" [limit]` | No | Exact + prefix title lookup only |
+| REST API | `POST /v1/titles/query` with JSON `{ sql, params, max_rows }` | Yes | Policy-constrained SQL `SELECT` queries |
+
+Notes:
+- The CLI `query` command does **not** accept SQL text.
+- SQL policy enforcement (SQLite authorizer) applies to the REST SQL endpoint.
+
+### CLI title lookup example
+
+```bash
+wikipedia-title-index query "Albert" 5
+```
+
+### REST SQL example
+
+Start service:
+
+```bash
+wikipedia-title-index serve
+```
+
+Run SQL query:
+
+```bash
+curl -sS -X POST http://127.0.0.1:32123/v1/titles/query \
+  -H "content-type: application/json" \
+  -d "{\"sql\":\"SELECT t FROM titles WHERE t >= ?1 AND t < ?2 ORDER BY t\",\"params\":[\"Albert\",\"Albert\uffff\"],\"max_rows\":5}"
 ```
 
 ## Environment variables
@@ -58,6 +93,11 @@ Endpoints:
 
 - `GET /health`
 - `POST /v1/titles/query`
+
+`POST /v1/titles/query` request body:
+- `sql` (required): SQL `SELECT` statement
+- `params` (optional): SQL parameters
+- `max_rows` (optional): response row cap (bounded by server limits)
 
 OpenAPI contract: `openapi/openapi.yaml`
 

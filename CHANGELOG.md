@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.1] - 2026-02-09
+
+### Changed
+- Clarified documentation for query capabilities:
+  - CLI `query` is title/prefix lookup only (no raw SQL input).
+  - REST `POST /v1/titles/query` is the SQL query surface with policy constraints.
+- Added explicit CLI vs REST query examples to reduce ambiguity on npm package page.
+
 ## [1.2.0] - 2026-02-09
 
 ### Added

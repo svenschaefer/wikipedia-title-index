@@ -196,6 +196,8 @@ The package SHOULD expose a minimal CLI:
 ```bash
 wikipedia-title-index build
 wikipedia-title-index serve
+wikipedia-title-index query "<title-or-prefix>" [limit]
+wikipedia-title-index cache clear
 wikipedia-title-index status
 wikipedia-title-index clean
 ```
@@ -208,6 +210,12 @@ Behavior:
 * `serve`
   Starts the local service and triggers auto-setup if required.
 
+* `query`
+  CLI title lookup only (exact + prefix). This command does not accept SQL.
+
+* `cache clear`
+  Removes cached query results under `data/cache`.
+
 * `status`
   Reports index and metadata status.
 
@@ -218,6 +226,10 @@ Public API surface policy:
 
 - Export only documented entry points via strict `package.json.exports`.
 - Undocumented internal paths are not part of the compatibility contract.
+
+REST SQL query surface:
+- Raw SQL is supported via `POST /v1/titles/query` only.
+- SQL is constrained to read-only `SELECT` against allowed objects by SQLite authorizer policy.
 
 ---
 
