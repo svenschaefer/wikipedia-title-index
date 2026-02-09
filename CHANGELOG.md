@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.2] - 2026-02-09
+
+### Fixed
+- SQL policy now allows safe aggregate table reads required for queries like `SELECT COUNT(*) FROM titles`.
+- Authorizer handling now accepts SQLite callbacks where `dbName` is `null` for permitted reads on `titles`.
+- Added regression coverage for `COUNT(*)` under authorizer policy.
+
 ## [1.2.1] - 2026-02-09
 
 ### Changed

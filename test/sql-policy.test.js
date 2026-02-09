@@ -27,6 +27,8 @@ test("authorizer allows read from titles and rejects sqlite_master", () => {
 
   const rows = db.prepare("SELECT t FROM titles").all();
   assert.equal(rows.length, 1);
+  const count = db.prepare("SELECT COUNT(*) AS c FROM titles").get();
+  assert.equal(count.c, 1);
 
   assert.throws(
     () => db.prepare("SELECT name FROM sqlite_master").all(),

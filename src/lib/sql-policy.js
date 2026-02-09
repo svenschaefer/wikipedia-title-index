@@ -31,13 +31,13 @@ function createAuthorizer() {
     }
 
     if (actionCode === constants.SQLITE_READ) {
-      if (dbName !== "main") {
+      if (!isAllowedDbName(dbName)) {
         return constants.SQLITE_DENY;
       }
       if (arg1 !== "titles") {
         return constants.SQLITE_DENY;
       }
-      if (arg2 !== "t") {
+      if (!isAllowedReadColumn(arg2)) {
         return constants.SQLITE_DENY;
       }
       return constants.SQLITE_OK;
@@ -45,6 +45,17 @@ function createAuthorizer() {
 
     return constants.SQLITE_DENY;
   };
+}
+
+function isAllowedReadColumn(columnName) {
+  // SQLite can report table-level reads for aggregates like COUNT(*)
+  // without a concrete column name.
+  return columnName === "t" || columnName === "" || columnName == null;
+}
+
+function isAllowedDbName(dbName) {
+  // Some SQLite authorizer callbacks report null for dbName.
+  return dbName === "main" || dbName == null;
 }
 
 function isSingleStatement(sql) {
@@ -113,4 +124,6 @@ module.exports = {
   validateQueryRequest,
   createAuthorizer,
   createClientError,
+  isAllowedReadColumn,
+  isAllowedDbName,
 };
