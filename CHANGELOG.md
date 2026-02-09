@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.6] - 2026-02-09
+
+### Changed
+- Removed all cache legacy/migration paths from runtime code.
+- Cache now supports only the current sharded bucket format.
+
+### Breaking
+- Existing cache files from older formats are no longer migrated automatically.
+- Operators MUST clear cache manually before/after upgrading:
+  - `npx wikipedia-title-index cache clear`
+  - or delete `data/cache/` directly.
+
 ## [1.2.5] - 2026-02-09
 
 ### Fixed

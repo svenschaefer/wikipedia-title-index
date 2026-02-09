@@ -18,24 +18,21 @@ function createQueryCache(config, options = {}) {
   const validatePayload = options.validatePayload ?? isCachedPayload;
 
   function get(query) {
-    const entryPath = getEntryPath(config.cacheDir, dbFingerprint, query);
     const queryKey = getQueryCacheKey(dbFingerprint, query);
+    const hash = getCacheHash(queryKey);
+    const entryPath = getShardedEntryPath(config.cacheDir, hash);
     if (!fs.existsSync(entryPath)) {
       return null;
     }
 
     try {
       const parsed = JSON.parse(fs.readFileSync(entryPath, "utf8"));
-      const normalized = normalizeBucket(parsed, queryKey, validatePayload);
-      if (!normalized) {
+      if (!isCacheBucket(parsed, validatePayload)) {
         fs.unlinkSync(entryPath);
         return null;
       }
 
-      if (normalized.migrated) {
-        writeJsonAtomically(entryPath, normalized.bucket);
-      }
-      const hit = normalized.bucket.entries.find((entry) => entry.key === queryKey);
+      const hit = parsed.entries.find((entry) => entry.key === queryKey);
       return hit ? hit.payload : null;
     } catch {
       try {
@@ -46,26 +43,24 @@ function createQueryCache(config, options = {}) {
   }
 
   function set(query, payload) {
-    const entryPath = getEntryPath(config.cacheDir, dbFingerprint, query);
     const queryKey = getQueryCacheKey(dbFingerprint, query);
+    const hash = getCacheHash(queryKey);
+    const entryPath = getShardedEntryPath(config.cacheDir, hash);
     try {
       let bucket = {
         version: CACHE_BUCKET_VERSION,
         entries: [],
       };
-      let needsWrite = false;
 
       if (fs.existsSync(entryPath)) {
         const parsed = JSON.parse(fs.readFileSync(entryPath, "utf8"));
-        const normalized = normalizeBucket(parsed, queryKey, validatePayload);
-        if (normalized) {
-          bucket = normalized.bucket;
-          needsWrite = normalized.migrated;
+        if (isCacheBucket(parsed, validatePayload)) {
+          bucket = parsed;
         }
       }
 
       if (bucket.entries.some((entry) => entry.key === queryKey)) {
-        if (bucket.version !== CACHE_BUCKET_VERSION || needsWrite) {
+        if (bucket.version !== CACHE_BUCKET_VERSION) {
           bucket.version = CACHE_BUCKET_VERSION;
           writeJsonAtomically(entryPath, bucket);
         }
@@ -207,31 +202,6 @@ function writeJsonAtomically(entryPath, value) {
   }
 }
 
-function normalizeBucket(parsed, queryKey, validatePayload) {
-  if (isCacheBucket(parsed, validatePayload)) {
-    return {
-      migrated: false,
-      bucket: {
-        version: CACHE_BUCKET_VERSION,
-        entries: parsed.entries,
-      },
-    };
-  }
-
-  // TODO(v1.3+): remove legacy single-payload migration path.
-  if (validatePayload(parsed)) {
-    return {
-      migrated: true,
-      bucket: {
-        version: CACHE_BUCKET_VERSION,
-        entries: [{ key: queryKey, payload: parsed }],
-      },
-    };
-  }
-
-  return null;
-}
-
 function isCacheBucket(value, validatePayload) {
   if (!value || typeof value !== "object") return false;
   if (!Array.isArray(value.entries)) return false;
@@ -268,5 +238,4 @@ module.exports = {
   getQueryCacheKey,
   getCacheHash,
   isCacheBucket,
-  normalizeBucket,
 };
