@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.5] - 2026-02-09
+
+### Fixed
+- Legacy single-payload cache files are now also migrated when touched via `set(...)` for an existing key (not only on `get(...)`).
+- Added regression coverage for migration-through-set behavior.
+
+### Changed
+- Documentation now consistently uses `npx wikipedia-title-index ...` for package-local installs.
+- Added explicit note that direct `wikipedia-title-index ...` invocation requires global install or local bin PATH resolution.
+
 ## [1.2.4] - 2026-02-09
 
 ### Changed

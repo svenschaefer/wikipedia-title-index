@@ -1,6 +1,6 @@
 const path = require("node:path");
 
-const API_VERSION = "1.2.4";
+const API_VERSION = "1.2.5";
 const SCHEMA_VERSION = "1";
 const SOURCE_TYPE = "all-titles-in-ns0";
 const DEFAULT_SOURCE_URL =

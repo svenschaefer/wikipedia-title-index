@@ -194,13 +194,17 @@ Metadata is authoritative for:
 The package SHOULD expose a minimal CLI:
 
 ```bash
-wikipedia-title-index build
-wikipedia-title-index serve
-wikipedia-title-index query "<title-or-prefix>" [limit]
-wikipedia-title-index cache clear
-wikipedia-title-index status
-wikipedia-title-index clean
+npx wikipedia-title-index build
+npx wikipedia-title-index serve
+npx wikipedia-title-index query "<title-or-prefix>" [limit]
+npx wikipedia-title-index cache clear
+npx wikipedia-title-index status
+npx wikipedia-title-index clean
 ```
+
+Invocation note:
+- For package-local installs, commands are run via `npx`.
+- Direct `wikipedia-title-index ...` invocation requires a global install or PATH-adjusted local bin resolution.
 
 Behavior:
 

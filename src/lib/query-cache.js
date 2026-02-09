@@ -53,17 +53,19 @@ function createQueryCache(config, options = {}) {
         version: CACHE_BUCKET_VERSION,
         entries: [],
       };
+      let needsWrite = false;
 
       if (fs.existsSync(entryPath)) {
         const parsed = JSON.parse(fs.readFileSync(entryPath, "utf8"));
         const normalized = normalizeBucket(parsed, queryKey, validatePayload);
         if (normalized) {
           bucket = normalized.bucket;
+          needsWrite = normalized.migrated;
         }
       }
 
       if (bucket.entries.some((entry) => entry.key === queryKey)) {
-        if (bucket.version !== CACHE_BUCKET_VERSION) {
+        if (bucket.version !== CACHE_BUCKET_VERSION || needsWrite) {
           bucket.version = CACHE_BUCKET_VERSION;
           writeJsonAtomically(entryPath, bucket);
         }

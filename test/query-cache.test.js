@@ -127,6 +127,47 @@ test("legacy cache file format is migrated on read", () => {
   }
 });
 
+test("legacy cache file format is migrated on set for existing key", () => {
+  const temp = makeTempWorkspace("query-cache-legacy-migration-set");
+  try {
+    const dbPath = path.join(temp, "data", "index", "titles.db");
+    const cacheDir = path.join(temp, "data", "cache");
+    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+    fs.writeFileSync(dbPath, "db-v1");
+
+    const config = {
+      cacheDir,
+      dbPath,
+      cacheEnabled: true,
+      cacheTtlSeconds: 86_400,
+      cacheMaxEntries: 10_000,
+    };
+    const query = { sql: "SELECT 1", params: [], maxRows: 1 };
+    const legacyPayload = { value: "legacy" };
+    const cachePath = getEntryPath(cacheDir, getDbFingerprint(dbPath), query);
+    fs.mkdirSync(path.dirname(cachePath), { recursive: true });
+    fs.writeFileSync(cachePath, JSON.stringify(legacyPayload), "utf8");
+
+    const cache = createQueryCache(config, {
+      validatePayload(value) {
+        return Boolean(value && typeof value === "object" && typeof value.value === "string");
+      },
+    });
+    cache.set(query, { value: "newer-ignored" });
+
+    const migrated = JSON.parse(fs.readFileSync(cachePath, "utf8"));
+    assert.equal(migrated.version, 2);
+    assert.equal(migrated.entries.length, 1);
+    assert.equal(
+      migrated.entries[0].key,
+      getQueryCacheKey(getDbFingerprint(dbPath), query)
+    );
+    assert.deepEqual(migrated.entries[0].payload, legacyPayload);
+  } finally {
+    removeTree(temp);
+  }
+});
+
 test("bucket cache format selects matching key in multi-entry file", () => {
   const temp = makeTempWorkspace("query-cache-bucket-hit");
   try {

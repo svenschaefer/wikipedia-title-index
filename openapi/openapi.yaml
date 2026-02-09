@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Wikipedia Titles Query Service
-  version: 1.2.4
+  version: 1.2.5
   license:
     name: UNLICENSED
     identifier: UNLICENSED

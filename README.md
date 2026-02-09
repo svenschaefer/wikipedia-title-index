@@ -23,13 +23,17 @@ npm i wikipedia-title-index
 ## CLI
 
 ```bash
-wikipedia-title-index build [--file <path> | --url <url>]
-wikipedia-title-index serve
-wikipedia-title-index query "<title-or-prefix>" [limit]
-wikipedia-title-index cache clear
-wikipedia-title-index status
-wikipedia-title-index clean
+npx wikipedia-title-index build [--file <path> | --url <url>]
+npx wikipedia-title-index serve
+npx wikipedia-title-index query "<title-or-prefix>" [limit]
+npx wikipedia-title-index cache clear
+npx wikipedia-title-index status
+npx wikipedia-title-index clean
 ```
+
+Installed-package usage:
+- Use `npx wikipedia-title-index ...` after `npm i wikipedia-title-index`.
+- Plain `wikipedia-title-index ...` works only when installed globally (or when your shell PATH includes local npm bins).
 
 ## Query modes (important)
 
@@ -37,7 +41,7 @@ wikipedia-title-index clean
 
 | Surface | How to use | Supports raw SQL? | Purpose |
 |---|---|---:|---|
-| CLI | `wikipedia-title-index query "<title-or-prefix>" [limit]` | No | Exact + prefix title lookup only |
+| CLI | `npx wikipedia-title-index query "<title-or-prefix>" [limit]` | No | Exact + prefix title lookup only |
 | REST API | `POST /v1/titles/query` with JSON `{ sql, params, max_rows }` | Yes | Policy-constrained SQL `SELECT` queries |
 
 Notes:
@@ -47,7 +51,7 @@ Notes:
 ### CLI title lookup example
 
 ```bash
-wikipedia-title-index query "Albert" 5
+npx wikipedia-title-index query "Albert" 5
 ```
 
 ### REST SQL example
@@ -55,7 +59,7 @@ wikipedia-title-index query "Albert" 5
 Start service:
 
 ```bash
-wikipedia-title-index serve
+npx wikipedia-title-index serve
 ```
 
 Run SQL query:
