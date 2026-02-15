@@ -111,9 +111,11 @@ OpenAPI contract: `openapi/openapi.yaml`
 ## Docs
 
 - Operations: `docs/OPS.md`
+- Operational guide index: `docs/OPERATIONAL.md`
 - Package contract: `docs/NPM.md`
 - Maintenance runbook: `MAINTENANCE.md`
 - Migration notes: `MIGRATION.md`
+- Status quo (docs index): `docs/STATUSQUO.md`
 - Guarantees: `docs/GUARANTEES.md`
 - Developer tooling (non-public): `docs/DEV_TOOLING.md`
 - Repo workflows: `docs/REPO_WORKFLOWS.md`

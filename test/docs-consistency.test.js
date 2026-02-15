@@ -17,6 +17,7 @@ test("docs reference core npm scripts and release template", () => {
   assert.ok(pkg.scripts["release:check"], "package.json must define release:check");
   assert.ok(pkg.scripts["pre-commit-check"], "package.json must define pre-commit-check");
   assert.ok(pkg.scripts["smoke:pack"], "package.json must define smoke:pack");
+  assert.ok(pkg.scripts["lint"], "package.json must define lint");
 
   assert.match(readme, /npm run lint:openapi/, "README should mention lint:openapi");
   assert.match(readme, /npm run pre-commit-check/, "README should mention pre-commit-check");
@@ -39,9 +40,12 @@ test("new baseline docs and templates exist", () => {
     "docs/RELEASE_NOTES_TEMPLATE.md",
     "docs/DEV_TOOLING.md",
     "docs/GUARANTEES.md",
+    "docs/OPERATIONAL.md",
+    "docs/STATUSQUO.md",
     "docs/REPO_WORKFLOWS.md",
     "docs/BASELINE_TEST_RUN.md",
     "docs/NPM_RELEASE.md",
+    "AGENTS.md",
     "MIGRATION.md",
     "MAINTENANCE.md",
   ];

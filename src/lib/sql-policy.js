@@ -50,12 +50,17 @@ function createAuthorizer() {
 function isAllowedReadColumn(columnName) {
   // SQLite can report table-level reads for aggregates like COUNT(*)
   // without a concrete column name.
-  return columnName === "t" || columnName === "" || columnName == null;
+  return (
+    columnName === "t" ||
+    columnName === "" ||
+    columnName === null ||
+    columnName === undefined
+  );
 }
 
 function isAllowedDbName(dbName) {
   // Some SQLite authorizer callbacks report null for dbName.
-  return dbName === "main" || dbName == null;
+  return dbName === "main" || dbName === null || dbName === undefined;
 }
 
 function isSingleStatement(sql) {
