@@ -1,27 +1,31 @@
 # Implementation Status (Current)
 
-- Package is functional and published-oriented as `wikipedia-title-index` (`v1.2.6`).
-- Core capabilities are implemented:
-  - Streaming index build from file/URL
+- `wikipedia-title-index` is implemented and operational at `v1.2.6` with a stable Node `>=24.10.0` CommonJS package setup.
+- Core functionality is complete:
+  - Streaming index build from local file or URL
   - Local SQLite title index
-  - Local HTTP service with constrained SQL endpoint
+  - Local HTTP service (`GET /health`, `POST /v1/titles/query`)
   - CLI commands: `build`, `serve`, `query`, `cache clear`, `status`, `clean`
-- Query model is clearly split:
-  - CLI `query`: title/prefix lookup only
-  - REST `POST /v1/titles/query`: policy-constrained SQL `SELECT`
-- Operational features in place:
-  - Auto-setup on first run (unless disabled)
-  - Build/service lock files with stale-lock recovery
-  - Query cache with TTL/size controls and clear command
-- Quality/verification:
-  - Test suite currently passing (`19/19`)
-  - OpenAPI lint passes
-  - Release process doc updated and aligned with actual scripts
-- Documentation/status:
-  - Main docs are up to date (`README.md`, `docs/OPS.md`, `CONTRIBUTING.md`, `NPM_RELEASE.md`)
-  - Security triage captured in `TODO.md`
-- Known deferred items (intentional, low priority for local-only use):
-  - HTTP (no TLS) on local server
-  - Potential internal error-message exposure in 5xx responses
-- Recent repo hygiene:
-  - Local helper scripts are ignored via `.gitignore` (`cody.bat`, `serve.bat`)
+- Query model is clearly separated:
+  - CLI `query` = title/prefix lookup only
+  - REST query endpoint = policy-constrained SQL `SELECT`
+- Runtime safeguards are in place:
+  - Auto-setup behavior (with opt-out)
+  - Build/service lock handling with stale-lock recovery
+  - Query cache with TTL/size controls and cache-clear command
+- Engineering baseline is mature:
+  - Cross-platform CI + manual release workflow
+  - Dependabot, CODEOWNERS, PR/issue templates
+  - Optional ESLint baseline (`npm run lint`) integrated
+  - Smoke-pack validation script (`npm run smoke:pack`)
+  - Non-blocking production `npm audit` CI job
+- Test/validation status is green:
+  - `22/22` tests passing
+  - OpenAPI lint passing
+  - Pack dry-run passing via `ci:check`
+- Documentation is comprehensive and aligned:
+  - Ops, package contract, guarantees, migration, maintenance, release process/templates, workflows, baseline test guidance, status docs
+  - Markdown audit performed; release smoke version-check instruction aligned with package `exports`
+- Known deferred security hardening (tracked, local-only risk accepted):
+  - localhost HTTP without TLS termination
+  - possible 5xx internal message exposure path for unknown errors
