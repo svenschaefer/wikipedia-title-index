@@ -21,6 +21,7 @@ test("docs reference core npm scripts and release template", () => {
   assert.match(readme, /npm run lint:openapi/, "README should mention lint:openapi");
   assert.match(readme, /npm run pre-commit-check/, "README should mention pre-commit-check");
   assert.match(readme, /npm run smoke:pack/, "README should mention smoke:pack");
+  assert.match(readme, /actions\/workflows\/ci\.yml/, "README should include CI badge/link");
   assert.match(
     releaseDoc,
     /docs\/RELEASE_NOTES_TEMPLATE\.md/,
@@ -39,6 +40,7 @@ test("new baseline docs and templates exist", () => {
     "docs/DEV_TOOLING.md",
     "docs/GUARANTEES.md",
     "MIGRATION.md",
+    "MAINTENANCE.md",
   ];
 
   for (const relativePath of requiredFiles) {

@@ -1,5 +1,8 @@
 # wikipedia-title-index
 
+[![CI](https://github.com/svenschaefer/wikipedia-title-index/actions/workflows/ci.yml/badge.svg)](https://github.com/svenschaefer/wikipedia-title-index/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/svenschaefer/wikipedia-title-index)](https://github.com/svenschaefer/wikipedia-title-index/releases)
+
 Local Wikipedia title index builder and constrained query service.
 
 ## Requirements
@@ -109,6 +112,7 @@ OpenAPI contract: `openapi/openapi.yaml`
 
 - Operations: `docs/OPS.md`
 - Package contract: `docs/NPM.md`
+- Maintenance runbook: `MAINTENANCE.md`
 - Migration notes: `MIGRATION.md`
 - Guarantees: `docs/GUARANTEES.md`
 - Developer tooling (non-public): `docs/DEV_TOOLING.md`
@@ -129,6 +133,7 @@ npm run smoke:pack
 
 Wikipedia title data is subject to Creative Commons Attribution-ShareAlike (CC BY-SA).
 This package does not alter, reinterpret, or relicense the underlying data.
+When redistributing derived outputs, ensure attribution and license obligations are met for the underlying Wikipedia data.
 
 ## Notes
 
