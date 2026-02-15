@@ -1,0 +1,27 @@
+# Implementation Status (Current)
+
+- Package is functional and published-oriented as `wikipedia-title-index` (`v1.2.6`).
+- Core capabilities are implemented:
+  - Streaming index build from file/URL
+  - Local SQLite title index
+  - Local HTTP service with constrained SQL endpoint
+  - CLI commands: `build`, `serve`, `query`, `cache clear`, `status`, `clean`
+- Query model is clearly split:
+  - CLI `query`: title/prefix lookup only
+  - REST `POST /v1/titles/query`: policy-constrained SQL `SELECT`
+- Operational features in place:
+  - Auto-setup on first run (unless disabled)
+  - Build/service lock files with stale-lock recovery
+  - Query cache with TTL/size controls and clear command
+- Quality/verification:
+  - Test suite currently passing (`19/19`)
+  - OpenAPI lint passes
+  - Release process doc updated and aligned with actual scripts
+- Documentation/status:
+  - Main docs are up to date (`README.md`, `docs/OPS.md`, `CONTRIBUTING.md`, `NPM_RELEASE.md`)
+  - Security triage captured in `TODO.md`
+- Known deferred items (intentional, low priority for local-only use):
+  - HTTP (no TLS) on local server
+  - Potential internal error-message exposure in 5xx responses
+- Recent repo hygiene:
+  - Local helper scripts are ignored via `.gitignore` (`cody.bat`, `serve.bat`)
