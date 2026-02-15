@@ -111,7 +111,16 @@ OpenAPI contract: `openapi/openapi.yaml`
 - Package contract: `docs/NPM.md`
 - Guarantees: `docs/GUARANTEES.md`
 - Developer tooling (non-public): `docs/DEV_TOOLING.md`
+- Release notes template: `docs/RELEASE_NOTES_TEMPLATE.md`
 - Agent behavior contract: `docs/AGENT.md`
+
+## Development Checks
+
+```bash
+npm test
+npm run lint:openapi
+npm run ci:check
+```
 
 ## Data and licensing
 

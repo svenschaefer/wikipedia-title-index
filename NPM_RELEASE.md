@@ -176,6 +176,8 @@ Create release for the pushed tag using the matching `CHANGELOG.md` section:
 gh release create v<x.y.z> --title "v<x.y.z>" --notes-file <notes-file>
 ```
 
+You MAY start from `docs/RELEASE_NOTES_TEMPLATE.md` when preparing `<notes-file>`.
+
 Verify:
 
 ```powershell
