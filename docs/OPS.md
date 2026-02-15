@@ -275,7 +275,7 @@ Query result caching requirements:
   - `WIKIPEDIA_INDEX_CACHE_ENABLED` (`0` disables reads/writes)
   - `WIKIPEDIA_INDEX_CACHE_TTL_SECONDS` (`0` disables TTL pruning)
   - `WIKIPEDIA_INDEX_CACHE_MAX_ENTRIES` (`0` disables size pruning)
-- Operators MAY clear cache via `wikipedia-title-index cache clear`.
+- Operators MAY clear cache via `npx wikipedia-title-index cache clear`.
 
 ---
 
