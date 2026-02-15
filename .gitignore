@@ -30,3 +30,7 @@ coverage/
 Thumbs.db
 .vscode/
 .idea/
+
+# Local helper scripts
+cody.bat
+serve.bat
