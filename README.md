@@ -109,6 +109,8 @@ OpenAPI contract: `openapi/openapi.yaml`
 
 - Operations: `docs/OPS.md`
 - Package contract: `docs/NPM.md`
+- Guarantees: `docs/GUARANTEES.md`
+- Developer tooling (non-public): `docs/DEV_TOOLING.md`
 - Agent behavior contract: `docs/AGENT.md`
 
 ## Data and licensing
