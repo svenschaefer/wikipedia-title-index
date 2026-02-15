@@ -66,7 +66,7 @@ npm install C:\code\wikipedia-title-index\wikipedia-title-index-<x.y.z>.tgz
 Run smoke checks:
 
 ```powershell
-node -e "console.log(require('wikipedia-title-index/package.json').version)"
+npm ls wikipedia-title-index --json
 npx wikipedia-title-index --help
 npx wikipedia-title-index status
 ```
@@ -161,7 +161,7 @@ npm install wikipedia-title-index@<x.y.z>
 Run smoke checks:
 
 ```powershell
-node -e "console.log(require('wikipedia-title-index/package.json').version)"
+npm ls wikipedia-title-index --json
 npx wikipedia-title-index --help
 npx wikipedia-title-index status
 ```
