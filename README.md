@@ -116,6 +116,9 @@ OpenAPI contract: `openapi/openapi.yaml`
 - Migration notes: `MIGRATION.md`
 - Guarantees: `docs/GUARANTEES.md`
 - Developer tooling (non-public): `docs/DEV_TOOLING.md`
+- Repo workflows: `docs/REPO_WORKFLOWS.md`
+- Baseline test run: `docs/BASELINE_TEST_RUN.md`
+- Release process index (docs): `docs/NPM_RELEASE.md`
 - Release notes template: `docs/RELEASE_NOTES_TEMPLATE.md`
 - Agent behavior contract: `docs/AGENT.md`
 

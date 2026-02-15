@@ -39,6 +39,9 @@ test("new baseline docs and templates exist", () => {
     "docs/RELEASE_NOTES_TEMPLATE.md",
     "docs/DEV_TOOLING.md",
     "docs/GUARANTEES.md",
+    "docs/REPO_WORKFLOWS.md",
+    "docs/BASELINE_TEST_RUN.md",
+    "docs/NPM_RELEASE.md",
     "MIGRATION.md",
     "MAINTENANCE.md",
   ];
