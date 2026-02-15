@@ -21,3 +21,11 @@ Examples of unacceptable behavior:
 ## Enforcement
 
 Project maintainers are responsible for clarifying and enforcing these standards and may remove or reject contributions that violate them.
+
+## Reporting and Escalation
+
+- For Code of Conduct concerns, contact the maintainer privately on GitHub: `@svenschaefer`.
+- Include links/screenshots/context to help triage quickly.
+- Reports will be reviewed promptly and handled confidentially where possible.
+
+If behavior involves a potential security issue, report via `SECURITY.md` instead of public channels.

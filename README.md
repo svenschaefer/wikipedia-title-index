@@ -129,6 +129,13 @@ npm run ci:check
 npm run smoke:pack
 ```
 
+## Known Limitations
+
+- Service transport is HTTP on localhost by default (no built-in TLS termination).
+- First run can be slow due to index bootstrap/download/build.
+- Local data footprint can be large (SQLite index plus optional cache files).
+- CLI `query` supports title/prefix lookup only; raw SQL is REST-only via `POST /v1/titles/query`.
+
 ## Data and licensing
 
 Wikipedia title data is subject to Creative Commons Attribution-ShareAlike (CC BY-SA).
