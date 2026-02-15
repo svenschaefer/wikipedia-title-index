@@ -29,7 +29,8 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "lint:openapi": "node scripts/lint-openapi.js",
-    "release-check": "node scripts/ensure-clean-worktree.js && npm test && npm run lint:openapi && npm pack --dry-run"
+    "ci:check": "npm test && npm run lint:openapi && npm pack --dry-run",
+    "release-check": "node scripts/ensure-clean-worktree.js && npm run ci:check"
   },
   "devDependencies": {
     "@redocly/cli": "^1.34.5"
