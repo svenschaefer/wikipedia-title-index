@@ -15,8 +15,12 @@ test("docs reference core npm scripts and release template", () => {
   assert.ok(pkg.scripts["ci:check"], "package.json must define ci:check");
   assert.ok(pkg.scripts["release-check"], "package.json must define release-check");
   assert.ok(pkg.scripts["release:check"], "package.json must define release:check");
+  assert.ok(pkg.scripts["pre-commit-check"], "package.json must define pre-commit-check");
+  assert.ok(pkg.scripts["smoke:pack"], "package.json must define smoke:pack");
 
   assert.match(readme, /npm run lint:openapi/, "README should mention lint:openapi");
+  assert.match(readme, /npm run pre-commit-check/, "README should mention pre-commit-check");
+  assert.match(readme, /npm run smoke:pack/, "README should mention smoke:pack");
   assert.match(
     releaseDoc,
     /docs\/RELEASE_NOTES_TEMPLATE\.md/,
@@ -34,6 +38,7 @@ test("new baseline docs and templates exist", () => {
     "docs/RELEASE_NOTES_TEMPLATE.md",
     "docs/DEV_TOOLING.md",
     "docs/GUARANTEES.md",
+    "MIGRATION.md",
   ];
 
   for (const relativePath of requiredFiles) {

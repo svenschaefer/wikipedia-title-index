@@ -9,9 +9,17 @@ These scripts are for local quality checks and CI hygiene:
 
 - `npm test`
 - `npm run lint:openapi`
+- `npm run pre-commit-check`
 - `npm run ci:check`
+- `npm run smoke:pack`
 - `npm run release-check`
 - `npm run release:check`
+
+Optional local pre-commit hook:
+
+```bash
+npm run pre-commit-check
+```
 
 ## Contract Boundary
 

@@ -109,6 +109,7 @@ OpenAPI contract: `openapi/openapi.yaml`
 
 - Operations: `docs/OPS.md`
 - Package contract: `docs/NPM.md`
+- Migration notes: `MIGRATION.md`
 - Guarantees: `docs/GUARANTEES.md`
 - Developer tooling (non-public): `docs/DEV_TOOLING.md`
 - Release notes template: `docs/RELEASE_NOTES_TEMPLATE.md`
@@ -119,7 +120,9 @@ OpenAPI contract: `openapi/openapi.yaml`
 ```bash
 npm test
 npm run lint:openapi
+npm run pre-commit-check
 npm run ci:check
+npm run smoke:pack
 ```
 
 ## Data and licensing

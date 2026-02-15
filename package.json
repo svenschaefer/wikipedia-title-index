@@ -29,6 +29,8 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "lint:openapi": "node scripts/lint-openapi.js",
+    "pre-commit-check": "npm test && npm run lint:openapi",
+    "smoke:pack": "node scripts/release-smoke-check.js",
     "ci:check": "npm test && npm run lint:openapi && npm pack --dry-run",
     "release-check": "node scripts/ensure-clean-worktree.js && npm run ci:check",
     "release:check": "npm run release-check"

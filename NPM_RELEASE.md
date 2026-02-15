@@ -48,6 +48,12 @@ Create tarball from current workspace:
 npm pack
 ```
 
+Or run the automated local tarball smoke flow:
+
+```powershell
+npm run smoke:pack
+```
+
 Create a clean smoke workspace (example):
 
 ```powershell

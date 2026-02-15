@@ -39,6 +39,45 @@ jobs:
       - name: Lint OpenAPI
         run: npm run lint:openapi
 
+  audit:
+    name: Audit (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit (production deps)
+        run: npm audit --omit=dev
+
+  smoke-pack:
+    name: Smoke Pack (linux)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tarball smoke check
+        run: npm run smoke:pack
+
   release-check:
     name: Release Check (tag)
     if: startsWith(github.ref, 'refs/tags/v')
